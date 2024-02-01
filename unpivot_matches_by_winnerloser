@@ -1,0 +1,45 @@
+CREATE TABLE `atpaustralians.atp_data.matches_unpiv_1968_current`
+
+AS
+(
+SELECT 
+tourney_name,
+tourney_id,
+tourney_date,
+tourney_level,
+round,
+winner_name AS player_name,
+winner_id AS player_id,
+winner_rank AS player_rank,
+winner_seed AS player_seed,
+loser_name AS opponent_name,
+loser_id AS opponent_id,
+loser_rank AS opponent_rank,
+loser_seed AS opponent_seed,
+'W' AS result,
+ROW_NUMBER() OVER () AS match_id
+
+FROM atpaustralians.atp_data.matches_1968_2023_20240201
+
+UNION ALL
+
+SELECT
+tourney_name,
+tourney_id,
+tourney_date,
+tourney_level,
+round,
+loser_name AS player_name,
+loser_id AS player_id,
+loser_rank AS player_rank,
+loser_seed AS player_seed,
+winner_name AS opponent_name,
+winner_id AS opponent_id,
+winner_rank AS opponent_rank,
+winner_seed AS opponent_seed,
+'L' AS result,
+ROW_NUMBER() OVER () AS match_id
+
+FROM atpaustralians.atp_data.matches_1968_2023_20240201
+
+)
