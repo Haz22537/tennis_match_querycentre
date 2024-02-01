@@ -1,0 +1,51 @@
+WITH streaks_table AS (
+
+SELECT
+    match_id,
+	  player_name,
+    tourney_name,
+	  round,	
+	  result,
+	  tourney_date,
+    streak_id,
+	  ROW_NUMBER() OVER (PARTITION BY player_id, result ORDER BY tourney_date) AS plr_mtchrd_id,
+    ROW_NUMBER() OVER (PARTITION BY player_id, round, result, streak_id ORDER BY tourney_date) AS streak_tracker
+	
+  
+  #limit to grandslam matches
+
+FROM
+ (
+    SELECT *,
+    CONCAT(player_id, '_', round, '_', result, '_',
+	(ROW_NUMBER() OVER (PARTITION BY player_id, round ORDER BY tourney_date ASC) - ROW_NUMBER() OVER (PARTITION BY player_id,round, result ORDER BY tourney_date ASC))) AS streak_id
+    FROM `atpaustralians.atp_data.matches_unpiv_1968_current` 
+    WHERE tourney_level = 'G'
+    ORDER BY player_name, tourney_date
+    ) ##matches table with streak_id added
+
+
+                    )  #end of streaks_table
+
+
+
+SELECT
+player_name,
+round,
+result,
+streak_id,
+MAX(streak_tracker) AS streak
+
+FROM
+streaks_table
+
+WHERE
+round = 'R128' AND result = 'W'
+
+GROUP BY 
+player_name,
+round,
+result,
+streak_id
+
+ORDER BY streak DESC
